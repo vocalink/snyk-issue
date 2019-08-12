@@ -1,0 +1,37 @@
+plugins {
+    id "org.springframework.boot" version "2.1.7.RELEASE"
+    id "io.spring.dependency-management" version "1.0.8.RELEASE"
+    id "java"
+    id "war"
+}
+
+repositories {
+    jcenter()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
+
+dependencies {
+    compile "org.springframework.boot:spring-boot-starter-web"
+    compile "org.springframework.boot:spring-boot-starter-json"
+}
+
+Closure versionStrategy = {
+    eachDependency { details ->
+        if (details.requested.group == "com.fasterxml.jackson.core" && details.requested.name == 'jackson-databind') {
+            details.useVersion '2.9.9.3'
+            details.because "spring boot 2.1.7 uses the wrong version: https://app.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-455617"
+        }
+    }
+}
+
+dependencyManagement {
+    overriddenByDependencies = false
+    resolutionStrategy versionStrategy
+}
+
+configurations*.resolutionStrategy versionStrategy
